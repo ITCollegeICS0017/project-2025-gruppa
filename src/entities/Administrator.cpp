@@ -17,3 +17,6 @@ std::string Administrator::getDiscountRulesRef() const { return discount_rules_r
 void Administrator::setName(const std::string& n) { name = n; }
 void Administrator::setAuthToken(const std::string& token) { auth_token = token; }
 void Administrator::setDiscountRulesRef(const std::string& rules) { discount_rules_ref = rules; }
+
+// Placeholder
+void Administrator::addProduct(const Product& p) {}
