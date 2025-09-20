@@ -3,7 +3,7 @@
 # GRUPPA Store
 ### Team members
 - Marat Biryukov (maratbiryukov)
-- Kirill Sevtsov (kirrshew)
+- Kirill Ševtsov (kirrshew)
 - Ivan Kuznetsov (iznetsss)
 ### Short Description 
 A software system that supports product publishing, ordering, and delivery operations for a company’s online store. The system will automate key tasks for both customers and administrators, including publishing product information, searching for products by parameters, placing orders with a chosen delivery date, and managing customer records.
