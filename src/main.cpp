@@ -1,10 +1,9 @@
 //
-// Created by shevt on 20.09.2025.
+// Created by iznets on 9/20/25.
 //
 #include <iostream>  // for std::cin and std::cout
 #include <string>    // for std::string
-#include "Customer.h"
-#include "Customer.cpp"
+#include "../include/entities/Customer.h"
 
 int main() {
     std::string userInput;
