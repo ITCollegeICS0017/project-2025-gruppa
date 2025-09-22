@@ -24,5 +24,13 @@ void Customer::addOrder(double amount) {
     total_spent += amount;
 }
 
-// view methods
-void Customer::viewProduct(const Product& p){}
+// Placeholders
+void Customer::viewProducts(const std::string& name, const std::string& description, double price)
+{
+}
+
+void Customer::placeOrder(const std::string& customer_username, const std::string& delivery_date,
+    const std::vector<int>& product_ids)
+{
+}
+

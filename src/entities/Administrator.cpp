@@ -19,4 +19,12 @@ void Administrator::setAuthToken(const std::string& token) { auth_token = token;
 void Administrator::setDiscountRulesRef(const std::string& rules) { discount_rules_ref = rules; }
 
 // Placeholder
-void Administrator::addProduct(const Product& p) {}
+void Administrator::addProduct(const std::string& name, const std::string& description, double price, int quantity)
+{
+}
+
+void Administrator::editDiscount(const std::string& customer_username, double discount)
+{
+}
+
+

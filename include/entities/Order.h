@@ -22,6 +22,7 @@ struct OrderItem {
 // main order class
 class Order {
 private:
+    int id;
     std::string customer_username;
     std::vector<OrderItem> items;
     std::string delivery_date;   // "YYYY-MM-DD"
@@ -35,6 +36,7 @@ public:
     Order(const std::string& customer, const std::string& date);
 
     // getters
+    int getId() const;
     std::string getCustomerUsername() const;
     std::vector<OrderItem> getItems() const;
     std::string getDeliveryDate() const;
@@ -51,6 +53,8 @@ public:
     // update methods
     void addItem(int prod_id, int qty, double unit_price);
     void calculateTotals();
+
+    static void notify(const std::string& id, int product_id);
 };
 
 #endif //PROJECT_2025_GRUPPA_ORDER_H

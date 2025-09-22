@@ -9,6 +9,7 @@
 #include <vector>
 
 class Product; // forward declaration
+class Customer; // forward declaration
 
 class Administrator {
 private:
@@ -28,7 +29,10 @@ public:
     void setName(const std::string& n);
     void setAuthToken(const std::string& token);
     void setDiscountRulesRef(const std::string& rules);
-    void addProduct(const Product& p);  // Placeholder
+
+    static void addProduct(const std::string& name, const std::string& description, double price, int quantity);
+    static void editDiscount(const std::string& customer_username, double discount);
+
 
 };
 

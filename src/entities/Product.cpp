@@ -7,7 +7,10 @@
 Product::Product(const std::string& n, const std::string& d, double p, int q)
     : name(n), description(d), price(p), quantity(q) {}
 
+
+
 // getters
+int Product::getId() const {return id;}
 std::string Product::getName() const { return name; }
 std::string Product::getDescription() const { return description; }
 double Product::getPrice() const { return price; }

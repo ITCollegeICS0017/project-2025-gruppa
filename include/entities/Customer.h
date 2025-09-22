@@ -36,7 +36,9 @@ public:
     // update methods
     void addOrder(double amount); // +1 order, +amount to total_spent
 
-    static void viewProduct(const Product& p); // Placeholder
+    static void viewProducts(const std::string& name, const std::string& description, double price);
+    static void placeOrder(const std::string& customer_username, const std::string& delivery_date, const std::vector<int>& product_ids);
+
 };
 
 #endif //PROJECT_2025_GRUPPA_CUSTOMER_H

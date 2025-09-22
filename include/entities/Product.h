@@ -11,6 +11,7 @@
 // simple entity class
 class Product {
 private:
+    int id;
     std::string name;
     std::string description;
     double price;
@@ -21,6 +22,7 @@ public:
     Product(const std::string& n, const std::string& d, double p, int q);
 
     // getters
+    int getId() const;
     std::string getName() const;
     std::string getDescription() const;
     double getPrice() const;

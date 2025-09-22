@@ -13,7 +13,10 @@ Order::Order(const std::string& customer, const std::string& date)
       discount_amount(0.0),
       total(0.0) {}
 
+
+
 // getters
+int Order::getId() const{ return id; }
 std::string Order::getCustomerUsername() const { return customer_username; }
 std::vector<OrderItem> Order::getItems() const { return items; }
 std::string Order::getDeliveryDate() const { return delivery_date; }
@@ -40,4 +43,8 @@ void Order::calculateTotals() {
     }
     total = subtotal - discount_amount;
     if (total < 0) total = 0.0;
+}
+
+void Order::notify(const std::string& id, int product_id)
+{
 }
