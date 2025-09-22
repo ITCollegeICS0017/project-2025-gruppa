@@ -23,3 +23,6 @@ void Customer::addOrder(double amount) {
     total_orders++;
     total_spent += amount;
 }
+
+// view methods
+void Customer::viewProduct(const Product& p){}

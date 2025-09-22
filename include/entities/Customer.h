@@ -7,6 +7,8 @@
 
 #include <string>
 
+#include "Administrator.h"
+
 // simple entity class
 class Customer {
 private:
@@ -33,6 +35,8 @@ public:
 
     // update methods
     void addOrder(double amount); // +1 order, +amount to total_spent
+
+    static void viewProduct(const Product& p); // Placeholder
 };
 
 #endif //PROJECT_2025_GRUPPA_CUSTOMER_H
