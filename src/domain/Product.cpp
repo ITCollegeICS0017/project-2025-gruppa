@@ -1,7 +1,9 @@
 #include "Product.h"
 
 Product::Product(const int id, const string& name, const string& description, const double price, const int quantity)
-    : id(id), name(name), description(description), price(price), quantity(quantity) {}
+    : id(id), name(name), description(description), price(price), quantity(quantity)
+{
+}
 
 int Product::getId() const { return id; }
 string Product::getName() const { return name; }

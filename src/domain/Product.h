@@ -10,7 +10,8 @@
 #include <string>
 using namespace std;
 
-class Product {
+class Product
+{
 private:
     int id;
     string name;
@@ -34,7 +35,6 @@ public:
     void setPrice(double new_price);
     void setQuantity(int new_quantity);
 };
-
 
 
 #endif //PROJECT_2025_GRUPPA_PRODUCT_H

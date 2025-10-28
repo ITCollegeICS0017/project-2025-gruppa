@@ -10,14 +10,14 @@
 #include <string>
 using namespace std;
 
-class Administrator {
+class Administrator
+{
 private:
     string username;
 
 public:
     Administrator(const string& username);
 };
-
 
 
 #endif //PROJECT_2025_GRUPPA_ADMINISTATOR_H
