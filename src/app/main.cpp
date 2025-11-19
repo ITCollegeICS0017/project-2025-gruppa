@@ -1,7 +1,6 @@
 #include "../services/LoginService.h"
 
-int main()
-{
+int main() {
     LoginService login;
     login.loginMenu();
     return 0;

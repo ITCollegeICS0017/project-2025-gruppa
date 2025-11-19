@@ -1,21 +1,40 @@
 #include "AdminService.h"
 #include <iostream>
 #include <limits>
+#include <stdexcept>
+#include <string>
 
-AdminService::AdminService()
-{
+namespace {
+    int readAdminMenuChoice() {
+        while (true) {
+            std::string input;
+            std::cout << "Choice: ";
+            std::cin >> input;
+
+            try {
+                if (input.size() != 1 || input[0] < '0' || input[0] > '2') {
+                    throw std::invalid_argument("Invalid menu choice.");
+                }
+
+                return input[0] - '0';
+            } catch (const std::invalid_argument &ex) {
+                std::cout << "Input error: " << ex.what() << '\n';
+            }
+        }
+    }
+}
+
+AdminService::AdminService() {
     loadProducts();
 }
 
-void AdminService::loadProducts()
-{
+void AdminService::loadProducts() {
     products.clear();
 
-    struct Seed
-    {
+    struct Seed {
         int id;
-        const char* name;
-        const char* description;
+        const char *name;
+        const char *description;
         double price;
         int quantity;
     };
@@ -33,16 +52,13 @@ void AdminService::loadProducts()
         {10, "GoPro Hero 13", "Action camera", 499.95, 5}
     };
 
-    for (const auto& s : seeds)
-    {
+    for (const auto &s: seeds) {
         products.emplace_back(s.id, s.name, s.description, s.price, s.quantity);
     }
 }
 
-void AdminService::addProduct()
-{
-    while (true)
-    {
+void AdminService::addProduct() {
+    while (true) {
         std::string name;
         std::string description;
         double price;
@@ -74,74 +90,64 @@ void AdminService::addProduct()
         std::cout << "1 - Save\n";
         std::cout << "2 - Cancel (exit)\n";
         std::cout << "3 - Edit (re-enter data)\n";
-        std::cout << "Choice: ";
 
         int choice;
         std::cin >> choice;
 
-        if (choice == 1)
-        {
+        if (choice == 1) {
             const int id = static_cast<int>(products.size()) + 1;
-            const Product new_product(id, name, description, price, quantity);
-            products.push_back(new_product);
+            const Product newProduct(id, name, description, price, quantity);
+            products.push_back(newProduct);
 
             std::cout << "\nProduct added successfully!\n";
-            std::cout << "ID: " << new_product.getId() << "\n";
-            std::cout << "Name: " << new_product.getName() << "\n";
-            std::cout << "Description: " << new_product.getDescription() << "\n";
-            std::cout << "Price: " << new_product.getPrice() << "\n";
-            std::cout << "Quantity: " << new_product.getQuantity() << "\n";
+            std::cout << "ID: " << newProduct.getId() << "\n";
+            std::cout << "Name: " << newProduct.getName() << "\n";
+            std::cout << "Description: " << newProduct.getDescription() << "\n";
+            std::cout << "Price: " << newProduct.getPrice() << "\n";
+            std::cout << "Quantity: " << newProduct.getQuantity() << "\n";
             return;
         }
-        if (choice == 2)
-        {
+        if (choice == 2) {
             std::cout << "Operation cancelled.\n";
             adminMenu();
             break;
         }
-        if (choice == 3)
-        {
+        if (choice == 3) {
             std::cout << "\nRestarting product entry...\n";
-        }
-        else
-        {
+        } else {
             std::cout << "Unknown option. Try again. \n";
         }
     }
 }
 
-void AdminService::adminMenu()
-{
-    int choice;
-    while (true)
-    {
+void AdminService::adminMenu() {
+    while (true) {
         std::cout << "\n--- Admin Menu ---\n"
-            << "1. Add product\n"
-            << "2. View products\n"
-            << "0. Logout\n"
-            << "Choice: ";
-        std::cin >> choice;
+                << "1. Add product\n"
+                << "2. View products\n"
+                << "0. Logout\n";
 
-        switch (choice)
-        {
-        case 1:
-            addProduct();
-            break;
-        case 2:
-            std::cout << "\n--- Product List ---\n";
-            for (const auto& p : products)
-            {
-                std::cout << p.getId() << ". " << p.getName()
-                    << " - $" << p.getPrice()
-                    << " (" << p.getQuantity() << " left)\n";
-            }
-            break;
-        case 0:
-            std::cout << "Logging out...\n";
-            return;
-        default:
-            std::cout << "Unknown option.\n";
-            break;
+        int choice = readAdminMenuChoice();
+
+        switch (choice) {
+            case 1:
+                addProduct();
+                break;
+            case 2:
+                std::cout << "\n--- Product List ---\n";
+                for (const auto &p: products) {
+                    std::cout << p.getId() << ". " << p.getName()
+                            << " - $" << p.getPrice()
+                            << " (" << p.getQuantity() << " left)\n";
+                }
+                break;
+            case 0:
+                std::cout << "Logging out...\n";
+                return;
+            default:
+                // theoretically unreachable
+                std::cout << "Unknown option.\n";
+                break;
         }
     }
 }
