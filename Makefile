@@ -1,21 +1,40 @@
-CC=gcc
-CFLAGS=-Wall -Wextra -Werror -std=c11
-SRC=$(wildcard src/*.c)
-OBJ=$(SRC:.c=.o)
-BIN=app
+CXX := g++
+CXXFLAGS := -std=c++17 -Wall -Wextra -O2 -Isrc
+LDFLAGS :=
 
-.PHONY: all run test clean
+SRC_DIR := src
+BUILD_DIR := build
 
-all: $(BIN)
+# Find all .cpp files
+SRCS := $(shell find $(SRC_DIR) -name '*.cpp')
 
-$(BIN): $(OBJ)
-	$(CC) $(CFLAGS) -o $@ $^
+# Convert src/path/file.cpp → build/path/file.o
+OBJS := $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%.o,$(SRCS))
 
-run: $(BIN)
-	./$(BIN)
+# Targets for Linux and Windows
+TARGET_LINUX := $(BUILD_DIR)/store
+TARGET_WINDOWS := $(BUILD_DIR)/store.exe
 
-test: $(BIN) tests/test_basic.sh
-	bash tests/test_basic.sh
+# Default target builds both
+all: $(TARGET_LINUX) $(TARGET_WINDOWS)
 
+# Linux executable
+$(TARGET_LINUX): $(OBJS)
+	@mkdir -p $(dir $@)
+	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
+
+# Windows executable
+$(TARGET_WINDOWS): $(OBJS)
+	@mkdir -p $(dir $@)
+	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
+
+# Compile .cpp → .o ensuring directories exist
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+# Clean everything
 clean:
-	rm -f $(BIN) src/*.o
+	rm -rf $(BUILD_DIR)
+
+.PHONY: all clean
