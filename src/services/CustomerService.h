@@ -1,6 +1,3 @@
-#ifndef PROJECT_2025_GRUPPA_CUSTOMERSERVICE_H
-#define PROJECT_2025_GRUPPA_CUSTOMERSERVICE_H
-
 #pragma once
 #include <vector>
 #include <string>
@@ -18,5 +15,3 @@ public:
     void loadProducts();
     void customerMenu();
 };
-
-#endif // PROJECT_2025_GRUPPA_CUSTOMERSERVICE_H

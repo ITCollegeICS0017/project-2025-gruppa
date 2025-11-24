@@ -1,27 +1,62 @@
 #include "LoginService.h"
-#include <iostream>
-#include <string>
-#include "../domain/Administrator.h"
-#include "../domain/Customer.h"
-#include "AdminService.h"
-#include "CustomerService.h"
+#include <fstream>
+#include <sstream>
+#include <cctype>
 
-void LoginService::loginMenu()
-{
-    std::string username;
-    std::cout << "Enter your username: ";
-    std::cin >> username;
+namespace {
+    bool parseIsAdmin(const std::string &value) {
+        std::string lower;
+        lower.reserve(value.size());
+        for (char ch: value) {
+            lower.push_back(static_cast<char>(std::tolower(static_cast<unsigned char>(ch))));
+        }
+        return lower == "true";
+    }
+}
 
-    if (username == "admin")
-    {
-        Administrator admin("admin");
-        AdminService service;
-        service.adminMenu();
+LoginService::LoginService(const std::string &usersFilePath)
+    : usersFilePath(usersFilePath) {
+}
+
+bool LoginService::login(const std::string &username) {
+    bool isAdmin = false;
+
+    std::ifstream file(usersFilePath);
+    if (!file.is_open()) {
+        return false;
     }
-    else
-    {
-        Customer customer(username);
-        CustomerService service;
-        service.customerMenu();
+
+    std::string line;
+    bool isFirstLine = true;
+
+    while (std::getline(file, line)) {
+        if (line.empty()) {
+            continue;
+        }
+
+        if (isFirstLine) {
+            isFirstLine = false;
+            if (line.rfind("username;", 0) == 0) {
+                continue;
+            }
+        }
+
+        std::stringstream ss(line);
+        std::string fileUsername;
+        std::string isAdminStr;
+
+        if (!std::getline(ss, fileUsername, ';')) {
+            continue;
+        }
+        if (!std::getline(ss, isAdminStr, ';')) {
+            continue;
+        }
+
+        if (fileUsername == username) {
+            isAdmin = parseIsAdmin(isAdminStr);
+            break;
+        }
     }
+
+    return isAdmin;
 }

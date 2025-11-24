@@ -1,9 +1,3 @@
-//
-// Created by iznets on 10/28/25.
-//
-
-#ifndef PROJECT_2025_GRUPPA_ORDER_H
-#define PROJECT_2025_GRUPPA_ORDER_H
 #pragma once
 #include <string>
 #include <vector>
@@ -53,6 +47,3 @@ public:
     void setDeliveryDate(const chrono::system_clock::time_point& new_delivery_date);
     void setStatus(OrderStatus new_status);
 };
-
-
-#endif //PROJECT_2025_GRUPPA_ORDER_H

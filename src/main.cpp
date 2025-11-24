@@ -1,6 +1,5 @@
 #include "services/LoginService.h"
 
-
 int main()
 {
     LoginService login;

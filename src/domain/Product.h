@@ -1,11 +1,3 @@
-//
-// Created by Marat Biryukov on 26.10.2025.
-//
-
-#ifndef PROJECT_2025_GRUPPA_PRODUCT_H
-#define PROJECT_2025_GRUPPA_PRODUCT_H
-
-
 #pragma once
 #include <string>
 using namespace std;
@@ -35,6 +27,3 @@ public:
     void setPrice(double new_price);
     void setQuantity(int new_quantity);
 };
-
-
-#endif //PROJECT_2025_GRUPPA_PRODUCT_H
