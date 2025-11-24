@@ -7,33 +7,50 @@
 #include "AdminService.h"
 #include "CustomerService.h"
 #include "../utils/InputValidator.h"
+using namespace std;
 
-void LoginService::loginMenu() {
-    while (true) {
-        std::string username;
-        std::cout << "Enter your username: ";
-        std::cin >> username;
 
-        try {
-            if (!InputValidator::isUsernameValid(username)) {
-                throw std::invalid_argument(
+void LoginService::loginMenu()
+{
+    while (true)
+    {
+        string username;
+        cout << "Enter your username: ";
+        cin >> username;
+        if (cin.fail())
+        {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            throw InvalidInput{"format"};
+        }
+
+        try
+        {
+            if (!InputValidator::isUsernameValid(username))
+            {
+                throw invalid_argument(
                     "Invalid username. Use only Latin letters and digits, no spaces."
                 );
             }
 
-            if (username == "admin") {
+            if (username == "admin")
+            {
                 Administrator admin("admin");
                 AdminService service;
                 service.adminMenu();
-            } else {
+            }
+            else
+            {
                 Customer customer(username);
                 CustomerService service;
                 service.customerMenu();
             }
 
             break;
-        } catch (const std::invalid_argument &ex) {
-            std::cout << "Login error: " << ex.what() << '\n';
+        }
+        catch (const invalid_argument& ex)
+        {
+            cout << "Login error: " << ex.what() << '\n';
         }
     }
 }
