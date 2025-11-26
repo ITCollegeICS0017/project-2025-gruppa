@@ -8,7 +8,7 @@ BUILD_DIR := build
 # Find all .cpp files
 SRCS := $(shell find $(SRC_DIR) -name '*.cpp')
 
-# Convert src/path/file.cpp → build/path/file.o
+# Convert src/path/file.cpp to build/path/file.o
 OBJS := $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%.o,$(SRCS))
 
 # Targets for Linux and Windows
@@ -28,7 +28,7 @@ $(TARGET_WINDOWS): $(OBJS)
 	@mkdir -p $(dir $@)
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
 
-# Compile .cpp → .o ensuring directories exist
+# Compile .cpp to .o ensuring directories exist
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@

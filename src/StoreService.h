@@ -1,29 +1,28 @@
-#ifndef PROJECT_2025_GRUPPA_STORESERVICE_H
-#define PROJECT_2025_GRUPPA_STORESERVICE_H
-
-
 #pragma once
-#include <vector>
 #include <string>
-#include "Product.h"
-#include "Administrator.h"
-#include "Customer.h"
-using namespace std;
+#include <vector>
+#include "domain/Product.h"
 
 class StoreService {
 private:
-    vector<Product> products;
+    std::vector<Product> products;
 
 public:
     StoreService();
 
     void loadProducts();
+
     void addProduct();
-    void loginMenu();
+
     void customerMenu();
+
     void adminMenu();
+
+    void loginMenu();
 };
 
-
-
-#endif //PROJECT_2025_GRUPPA_STORESERVICE_H
+// Validation and Error Policies
+std::string readNonEmptyString(const std::string& prompt);
+void validatePrice(double price);
+void validateQuantity(int quantity);
+bool productExists(const std::vector<Product>& products, int id);

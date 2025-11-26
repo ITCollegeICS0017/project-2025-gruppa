@@ -1,7 +1,51 @@
 #include "StoreService.h"
 #include <iostream>
 #include <limits>
+#include <algorithm>
+#include <stdexcept>
+
+#include "domain/Administrator.h"
+#include "domain/Customer.h"
 using namespace std;
+
+
+// UI VALIDATION
+string readNonEmptyString(const string& prompt) {
+    string input;
+    while (true) {
+        cout << prompt;
+        getline(cin, input);
+
+        if (!input.empty() && input.find_first_not_of(" \t\n\r") != string::npos) {
+            return input;
+        }
+
+        cout << "Input cannot be empty. Try again.\n";
+    }
+}
+
+// LOGIC VALIDATION
+void validatePrice(double price) {
+    if (price <= 0) {
+        throw runtime_error("Price must be greater than 0.");
+    }
+}
+
+// ERROR POLICY
+void validateQuantity(int quantity) {
+    if (quantity <= 0) {
+        throw runtime_error("Quantity must be greater than 0.");
+    }
+}
+
+// REPOSITORY VALIDATION
+bool productExists(const vector<Product>& products, int id) {
+    for (const auto& p : products) {
+        if (p.getId() == id) return true;
+    }
+    return false;
+}
+
 
 StoreService::StoreService() {
     loadProducts();
@@ -38,53 +82,41 @@ void StoreService::loadProducts() {
 
 void StoreService::addProduct() {
     while (true) {
-        string name;
-        string description;
+        string name, description;
         double price;
         int quantity;
 
         cout << "\n-- Add New Product --\n";
-
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-        cout << "Product name: ";
-        getline(cin, name);
-
-        cout << "Product description: ";
-        getline(cin, description);
+        name = readNonEmptyString("Product name: ");
+        description = readNonEmptyString("Product description: ");
 
         cout << "Product price: ";
         cin >> price;
-
         cout << "Product quantity: ";
         cin >> quantity;
 
+        try {
+            validatePrice(price);
+            validateQuantity(quantity);
+        } catch (const exception& ex) {
+            cout << "Error: " << ex.what() << "\nTry again.\n";
+            continue;
+        }
+
         cout << "\nReview:\n";
-        cout << "Name: " << name << "\n";
-        cout << "Description: " << description << "\n";
-        cout << "Price: " << price << "\n";
-        cout << "Quantity: " << quantity << "\n\n";
+        cout << "Name: " << name << "\nDescription: " << description
+             << "\nPrice: " << price << "\nQuantity: " << quantity << "\n\n";
 
-        cout << "Confirm action:\n";
-        cout << "1 - Save\n";
-        cout << "2 - Cancel (exit)\n";
-        cout << "3 - Edit (re-enter data)\n";
-        cout << "Choice: ";
-
+        cout << "Confirm action:\n1 - Save\n2 - Cancel\n3 - Edit\nChoice: ";
         int choice;
         cin >> choice;
 
         if (choice == 1) {
             const int id = products.size() + 1;
-            const Product new_product(id, name, description, price, quantity);
-            products.push_back(new_product);
-
-            cout << "\nProduct added successfully!\n";
-            cout << "ID: " << new_product.getId() << "\n";
-            cout << "Name: " << new_product.getName() << "\n";
-            cout << "Description: " << new_product.getDescription() << "\n";
-            cout << "Price: " << new_product.getPrice() << "\n";
-            cout << "Quantity: " << new_product.getQuantity() << "\n";
+            products.emplace_back(id, name, description, price, quantity);
+            cout << "Product added successfully!\n";
             return;
         }
         if (choice == 2) {
@@ -93,46 +125,57 @@ void StoreService::addProduct() {
             break;
         }
         if (choice == 3) {
-            cout << "\nRestarting product entry...\n";
+            cout << "Restarting product entry...\n";
         } else {
-            cout << "Unknown option. Try again. \n";
+            cout << "Unknown option. Try again.\n";
         }
     }
 }
 
 void StoreService::customerMenu() {
-    cout << "\n--- Customer Menu ---\n";
-    cout << "Feature not implemented yet.\n";
+    cout << "\n--- Customer Menu ---\nFeature not implemented yet.\n";
 }
 
 void StoreService::adminMenu() {
     int choice;
     while (true) {
-        cout << "\n--- Admin Menu ---\n"
-                << "1. Add product\n"
-                << "2. View products\n"
-                << "0. Logout\n"
-                << "Choice: ";
+        cout << "\n--- Admin Menu ---\n1. Add product\n2. View products\n3. Delete product\n0. Logout\nChoice: ";
         cin >> choice;
 
         switch (choice) {
-            case 1:
-                addProduct();
-                break;
+            case 1: addProduct(); break;
             case 2:
                 cout << "\n--- Product List ---\n";
                 for (const auto &p: products) {
                     cout << p.getId() << ". " << p.getName()
-                            << " - $" << p.getPrice()
-                            << " (" << p.getQuantity() << " left)\n";
+                         << " - $" << p.getPrice()
+                         << " (" << p.getQuantity() << " left)\n";
                 }
                 break;
+            case 3: {
+                cout << "Enter product ID to delete: ";
+                int id;
+                cin >> id;
+
+                if (!productExists(products, id)) {
+                    cout << "Error: Product ID does not exist.\n";
+                    break;
+                }
+
+                products.erase(
+                    remove_if(products.begin(), products.end(),
+                              [id](const Product& p){ return p.getId() == id; }),
+                    products.end()
+                );
+
+                cout << "Product deleted successfully.\n";
+                break;
+            }
             case 0:
                 cout << "Logging out...\n";
-                return; // exits adminMenu and returns to loginMenu caller
+                return;
             default:
                 cout << "Unknown option.\n";
-                break;
         }
     }
 }
