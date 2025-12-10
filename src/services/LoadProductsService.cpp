@@ -1,4 +1,4 @@
-#include "SearchService.h"
+#include "LoadProductsService.h"
 #include <fstream>
 #include <sstream>
 
@@ -60,11 +60,11 @@ namespace {
     }
 }
 
-SearchService::SearchService(const std::string &dbFilePath)
+LoadProductsService::LoadProductsService(const std::string &dbFilePath)
     : dbFilePath(dbFilePath) {
 }
 
-std::vector<Product> SearchService::loadAll() const {
+std::vector<Product> LoadProductsService::loadAll() const {
     std::vector<Product> result;
     std::ifstream file(dbFilePath);
     if (!file.is_open()) {
@@ -91,7 +91,7 @@ std::vector<Product> SearchService::loadAll() const {
     return result;
 }
 
-std::optional<Product> SearchService::findById(int id) const {
+std::optional<Product> LoadProductsService::findById(int id) const {
     const std::vector<Product> products = loadAll();
     for (const auto &product: products) {
         if (product.getId() == id) {
@@ -101,7 +101,7 @@ std::optional<Product> SearchService::findById(int id) const {
     return std::nullopt;
 }
 
-std::vector<Product> SearchService::findByKeyword(const std::string &keyword) const {
+std::vector<Product> LoadProductsService::findByKeyword(const std::string &keyword) const {
     std::vector<Product> matches;
     if (keyword.empty()) {
         return matches;
@@ -118,7 +118,7 @@ std::vector<Product> SearchService::findByKeyword(const std::string &keyword) co
     return matches;
 }
 
-std::vector<Product> SearchService::findByPriceRange(
+std::vector<Product> LoadProductsService::findByPriceRange(
     std::optional<double> minPrice,
     std::optional<double> maxPrice
 ) const {

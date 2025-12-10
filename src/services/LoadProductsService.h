@@ -8,14 +8,14 @@
 #include <optional>
 #include "../domain/Product.h"
 
-class SearchService {
+class LoadProductsService {
 private:
     std::string dbFilePath;
 
     std::vector<Product> loadAll() const;
 
 public:
-    explicit SearchService(const std::string &dbFilePath = "src/database/products.csv");
+    explicit LoadProductsService(const std::string &dbFilePath = "src/database/products.csv");
 
     std::optional<Product> findById(int id) const;
 
