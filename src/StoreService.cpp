@@ -11,7 +11,8 @@
 
 using namespace std;
 
-
+// PRODUCT SEARCH
+void searchUI(const std::vector<Product>& inventory);
 
 // UI VALIDATION
 string readNonEmptyString(const string& prompt)
@@ -137,31 +138,68 @@ void StoreService::addProduct()
 
 void StoreService::customerMenu()
 {
-    cout << "\n--- Customer Menu ---\nFeature not implemented yet.\n";
+    int choice;
+    while (true)
+    {
+        cout << "\n--- Customer Menu ---"
+            "\n1. Search products"
+            "\n2. View products"
+            "\n0. Logout"
+            "\nChoice: ";
+        cin >> choice;
+
+        switch (choice)
+        {
+        case 1:
+            searchUI(products);
+            break;
+        case 2:
+            cout << "\n--- Product List ---\n";
+            for (const auto& p : products)
+            {
+                cout << p.getId() << ". " << p.getName()
+                    << " - $" << p.getPrice()
+                    << " (" << p.getQuantity() << " left)\n";
+            }
+            break;
+        case 0:
+            cout << "Logging out...\n";
+            return;
+        default:
+            cout << "Unknown option.\n";
+        }
+    }
 }
 
 
 // === SEARCH ===
-std::string toLowerCase(std::string str) {
+std::string toLowerCase(std::string str)
+{
     // Transform the string in-place to lowercase
     std::transform(str.begin(), str.end(), str.begin(),
-                   [](unsigned char c){ return std::tolower(c); });
+                   [](unsigned char c) { return std::tolower(c); });
     return str;
 }
 
-double getValidDouble(const std::string& prompt) {
+double getValidDouble(const std::string& prompt)
+{
     std::string input;
-    while (true) {
+    while (true)
+    {
         std::cout << prompt;
         std::getline(std::cin, input);
 
         if (input.empty()) return -1.0; // Handle empty input
 
-        try {
+        try
+        {
             size_t pos;
             double val = std::stod(input, &pos);
             if (pos == input.length()) return val; // Successfully parsed entire string
-        } catch (...) {}
+        }
+        catch (...)
+        {
+        }
 
         std::cout << "Invalid price. Please enter a number or press Enter to skip.\n";
     }
@@ -171,22 +209,26 @@ std::vector<const Product*> searchProducts(const std::vector<Product>& inventory
                                            std::string nameQuery, // Passed by value to modify
                                            std::string descQuery, // Passed by value to modify
                                            double minPrice,
-                                           double maxPrice) {
+                                           double maxPrice)
+{
     std::vector<const Product*> matches;
 
     // 1. Pre-process queries (convert to lowercase once)
     nameQuery = toLowerCase(nameQuery);
     descQuery = toLowerCase(descQuery);
 
-    for (const auto& p : inventory) {
+    for (const auto& p : inventory)
+    {
         // 2. Check Name (Compare lowercase vs lowercase)
-        if (!nameQuery.empty()) {
+        if (!nameQuery.empty())
+        {
             std::string pName = toLowerCase(p.getName());
             if (pName.find(nameQuery) == std::string::npos) continue;
         }
 
         // 3. Check Description (Compare lowercase vs lowercase)
-        if (!descQuery.empty()) {
+        if (!descQuery.empty())
+        {
             std::string pDesc = toLowerCase(p.getDescription());
             if (pDesc.find(descQuery) == std::string::npos) continue;
         }
@@ -200,7 +242,8 @@ std::vector<const Product*> searchProducts(const std::vector<Product>& inventory
     return matches;
 }
 
-void searchUI(const std::vector<Product>& inventory) {
+void searchUI(const std::vector<Product>& inventory)
+{
     std::cout << "\n--- Search Products ---\n";
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     // ... Input gathering code remains the same ...
@@ -217,14 +260,14 @@ void searchUI(const std::vector<Product>& inventory) {
 
     // Display Results directly
     std::cout << "\nFound " << results.size() << " product(s):\n";
-    for (const Product* p : results) {
+    for (const Product* p : results)
+    {
         // Access members directly via arrow operator (->)
         std::cout << "ID: " << p->getId()
-                  << " | " << p->getName()
-                  << " | $" << p->getPrice() << "\n";
+            << " | " << p->getName()
+            << " | $" << p->getPrice() << "\n";
     }
 }
-
 
 
 void StoreService::adminMenu()
