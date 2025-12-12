@@ -74,11 +74,19 @@ git tag release-3
 git push origin release-3
 ```
 
+**End of Release 4:**
+
+```bash
+git tag release-4
+git push origin release-4
+```
+
 ### Folders for Documents
 
-* `docs/release-1/` — slides, SRS/SDP updates, test report
+* `docs/release-1/` — Slides, SRS/SDP updates, test report
 * `docs/release-2/` — Detailed Level Design
 * `docs/release-3/` — Updated DLD
+* `docs/release-4/` — Updated DLD and added Development Completion Report
 
 ## Authors / Contributors
 
