@@ -10,7 +10,7 @@ private:
     void ensureUsersFile() const;
 
 public:
-    explicit LoginService(std::string usersFilePath = "../database/users.csv");
+    explicit LoginService(std::string usersFilePath = "database/users.csv");
 
     // Checks if username exists; sets isAdmin
     bool userExists(const std::string& username, bool& isAdmin) const;

@@ -1,4 +1,5 @@
 #include "StoreService.h"
+#include "services/OrderService.h"
 #include <iostream>
 #include <limits>
 #include <algorithm>
@@ -70,7 +71,7 @@ void StoreService::loadProducts()
 {
     products.clear();
 
-    LoadProductsService searchService("../database/products.csv");
+    LoadProductsService searchService("database/products.csv");
     products = searchService.findByPriceRange(std::nullopt, std::nullopt);
 }
 
@@ -139,37 +140,69 @@ void StoreService::addProduct()
 void StoreService::customerMenu()
 {
     int choice;
+    std::string username;
+
+    cout << "\nEnter your username: ";
+    cin >> username;
+
     while (true)
     {
         cout << "\n--- Customer Menu ---"
             "\n1. Search products"
             "\n2. View products"
+            "\n3. View orders"
             "\n0. Logout"
             "\nChoice: ";
         cin >> choice;
 
         switch (choice)
         {
-        case 1:
-            searchUI(products);
-            break;
-        case 2:
-            cout << "\n--- Product List ---\n";
-            for (const auto& p : products)
+            case 1:
+                searchUI(products);
+                break;
+
+            case 2:
+                cout << "\n--- Product List ---\n";
+                for (const auto& p : products)
+                {
+                    cout << p.getId() << ". " << p.getName()
+                        << " - $" << p.getPrice()
+                        << " (" << p.getQuantity() << " left)\n";
+                }
+                break;
+
+            case 3:
             {
-                cout << p.getId() << ". " << p.getName()
-                    << " - $" << p.getPrice()
-                    << " (" << p.getQuantity() << " left)\n";
+                cout << "\n--- Your Orders ---\n";
+                OrderService service("database/orders.csv");
+                auto orders = service.getOrdersByUser(username);
+
+                if (orders.empty()) {
+                    cout << "You have no orders.\n";
+                    break;
+                }
+
+                for (const auto& o : orders)
+                {
+                    cout << "Order #" << o.getId()
+                         << " | Product ID: " << o.getProductId()
+                         << " | Date: " << o.getDate()
+                         << " | Status: " << statusToString(o.getStatus())
+                         << "\n";
+                }
+                break;
             }
-            break;
-        case 0:
-            cout << "Logging out...\n";
-            return;
-        default:
-            cout << "Unknown option.\n";
+
+            case 0:
+                cout << "Logging out...\n";
+                return;
+
+            default:
+                cout << "Unknown option.\n";
         }
     }
 }
+
 
 
 // === SEARCH ===
@@ -276,11 +309,12 @@ void StoreService::adminMenu()
     while (true)
     {
         cout << "\n--- Admin Menu ---"
-            "\n1. Add product menu"
-            "\n2. View products"
-            "\n3. Delete product"
-            "\n0. Logout"
-            "\nChoice: ";
+                "\n1. Add product menu"
+                "\n2. View products"
+                "\n3. Delete product"
+                "\n4. View all orders"
+                "\n0. Logout"
+                "\nChoice: ";
         cin >> choice;
 
         switch (choice)
@@ -317,6 +351,27 @@ void StoreService::adminMenu()
                 cout << "Product deleted successfully.\n";
                 break;
             }
+        case 4:
+        {
+            cout << "\n--- ALL ORDERS ---\n";
+            OrderService service("database/orders.csv");
+            auto orders = service.getOrdersByUser("admin"); // admin sees all
+
+            if (orders.empty()) {
+                cout << "No orders in the system.\n";
+                break;
+            }
+
+            for (const auto& o : orders)
+            {
+                cout << "Order #" << o.getId()
+                     << " | Product ID: " << o.getProductId()
+                     << " | Date: " << o.getDate()
+                     << " | Status: " << statusToString(o.getStatus())
+                     << "\n";
+            }
+            break;
+        }
         case 0:
             cout << "Logging out...\n";
             return;
