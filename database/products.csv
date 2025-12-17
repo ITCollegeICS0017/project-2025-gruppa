@@ -1,6 +1,5 @@
 id;name;description;price;quantity
 1;iPhone 17 Pro;Latest Apple phone;1200.99;5
-2;Galaxy S25;Flagship Samsung phone;1100.49;3
 3;Pixel 9;Google’s new phone;999.99;4
 4;MacBook Air M4;Lightweight Apple laptop;1599.99;2
 5;Dell XPS 15;High-performance laptop;1399.50;6
@@ -11,3 +10,4 @@ id;name;description;price;quantity
 10;GoPro Hero 13;Action camera;499.95;5
 11;Test Item 1;Temporary test item;777.77;42
 13;Test Item 1;Temporary test item;777.77;42
+14;test;testtest;123.23;52

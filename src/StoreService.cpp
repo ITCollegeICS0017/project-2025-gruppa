@@ -5,15 +5,96 @@
 #include <algorithm>
 #include <stdexcept>
 #include <optional>
-
+#include <fstream>
+#include <cstdio>
+#include <sstream>
+#include <map>
+#include <cctype>
+#include <iomanip>
 #include "domain/Administrator.h"
 #include "domain/Customer.h"
 #include "services/LoadProductsService.h"
 
 using namespace std;
 
+// Helper for writing into file
+int getMaxProductId(const std::vector<Product>& products)
+{
+    int maxId = 0;
+    for (const auto& p : products)
+    {
+        if (p.getId() > maxId) maxId = p.getId();
+    }
+    return maxId;
+}
+
+// Helper for deleting from the file
+bool deleteProductFromFile(int id)
+{
+    const std::string inputPath = "../database/products.csv";
+    const std::string tempPath = "../database/products.tmp";
+
+    std::ifstream in(inputPath);
+    if (!in.is_open()) return false;
+
+    std::ofstream out(tempPath, std::ios::trunc);
+    if (!out.is_open()) return false;
+
+    std::string line;
+    bool deleted = false;
+
+    while (std::getline(in, line))
+    {
+        if (line.empty()) continue;
+
+        if (!std::isdigit(static_cast<unsigned char>(line[0])))
+        {
+            out << line << '\n';
+            continue;
+        }
+
+        std::stringstream ss(line);
+        std::string idStr;
+        if (!std::getline(ss, idStr, ';'))
+        {
+            out << line << '\n';
+            continue;
+        }
+
+        int lineId = 0;
+        try { lineId = std::stoi(idStr); }
+        catch (...) { out << line << '\n'; continue; }
+
+        if (lineId == id)
+        {
+            deleted = true;
+            continue;
+        }
+
+        out << line << '\n';
+    }
+
+    in.close();
+    out.close();
+
+    if (!deleted)
+    {
+        std::remove(tempPath.c_str());
+        return false;
+    }
+
+    std::remove(inputPath.c_str());
+    std::rename(tempPath.c_str(), inputPath.c_str());
+    return true;
+}
+// REMOVE FROM BAG
+void removeFromBagUI(std::map<int, int>& bag, const std::vector<Product>& inventory);
 // PRODUCT SEARCH
 void searchUI(const std::vector<Product>& inventory);
+// ADD TO BAG
+void addToBagUI(const std::vector<Product>& inventory, std::map<int, int>& bag);
+//VIEW BAG
+void viewBag(const std::map<int, int>& bag, const std::vector<Product>& inventory);
 
 // UI VALIDATION
 string readNonEmptyString(const string& prompt)
@@ -71,7 +152,7 @@ void StoreService::loadProducts()
 {
     products.clear();
 
-    LoadProductsService searchService("database/products.csv");
+    LoadProductsService searchService("../database/products.csv");
     products = searchService.findByPriceRange(std::nullopt, std::nullopt);
 }
 
@@ -115,9 +196,19 @@ void StoreService::addProduct()
 
         if (choice == 1)
         {
-            const int id = products.size() + 1;
+            const int id = getMaxProductId(products) + 1;
+
+            std::ofstream file("../database/products.csv", std::ios::app);
+            if (!file.is_open())
+            {
+                std::cout << "ERROR: Cannot open products.csv for writing\n";
+                return;
+            }
+
+            file << '\n' << id << ';' << name << ';' << description << ';' << price << ';' << quantity;
+
             products.emplace_back(id, name, description, price, quantity);
-            cout << "Product added successfully!\n";
+            std::cout << "Product added successfully!\n";
             return;
         }
         if (choice == 2)
@@ -128,7 +219,7 @@ void StoreService::addProduct()
         }
         if (choice == 3)
         {
-            cout << "Restarting product entry...\n";
+            cout << "Restarting product entry..";
         }
         else
         {
@@ -137,23 +228,32 @@ void StoreService::addProduct()
     }
 }
 
-void StoreService::customerMenu()
+void StoreService::customerMenu(const std::string& username)
 {
-    int choice;
-    std::string username;
-
-    cout << "\nEnter your username: ";
-    cin >> username;
+    int choice = 0;
+    std::map<int, int> bag;
 
     while (true)
     {
         cout << "\n--- Customer Menu ---"
-            "\n1. Search products"
-            "\n2. View products"
-            "\n3. View orders"
-            "\n0. Logout"
-            "\nChoice: ";
+             << "\n1. Search products"
+             << "\n2. View products"
+             << "\n3. View orders"
+             << "\n4. My bag"
+             << "\n5. Add to bag"
+             << "\n6. Delete from bag"
+             << "\n0. Logout"
+             << "\nChoice: ";
+
         cin >> choice;
+
+        if (cin.fail())
+        {
+            cin.clear();
+            cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            cout << "Invalid input.\n";
+            continue;
+        }
 
         switch (choice)
         {
@@ -174,7 +274,7 @@ void StoreService::customerMenu()
             case 3:
             {
                 cout << "\n--- Your Orders ---\n";
-                OrderService service("database/orders.csv");
+                OrderService service("../database/orders.csv");
                 auto orders = service.getOrdersByUser(username);
 
                 if (orders.empty()) {
@@ -192,7 +292,15 @@ void StoreService::customerMenu()
                 }
                 break;
             }
-
+            case 4:
+                viewBag(bag, products);
+                break;
+            case 5:
+                addToBagUI(products, bag);
+                break;
+            case 6:
+                removeFromBagUI(bag, products);
+                break;
             case 0:
                 cout << "Logging out...\n";
                 return;
@@ -202,6 +310,174 @@ void StoreService::customerMenu()
         }
     }
 }
+// === VIEW BAG ===
+void viewBag(const std::map<int, int>& bag, const std::vector<Product>& inventory) {
+    if (bag.empty()) {
+        std::cout << "\nYour bag is empty.\n";
+        return;
+    }
+
+    double grandTotal = 0.0;
+
+    std::cout << "\n--- Your Shopping Bag ---\n";
+    std::cout << std::left << std::setw(5) << "ID"
+              << std::setw(20) << "Name"
+              << std::setw(10) << "Qty"
+              << std::right << std::setw(10) << "Total" << "\n";
+    std::cout << std::string(45, '-') << "\n";
+
+    // Iterate through the map (Key: ID, Value: Quantity)
+    for (const auto& [id, quantity] : bag) {
+        // Find the product details in inventory
+        for (const auto& product : inventory) {
+            if (product.getId() == id) {
+                double rowTotal = product.getPrice() * quantity;
+                grandTotal += rowTotal;
+
+                std::cout << std::left << std::setw(5) << id
+                          << std::setw(20) << product.getName().substr(0, 19) // Truncate if too long
+                          << std::setw(10) << quantity
+                          << std::right << std::fixed << std::setprecision(2)
+                          << "$" << std::setw(9) << rowTotal << "\n";
+                break; // Product found, move to next item in bag
+            }
+        }
+    }
+
+    std::cout << std::string(45, '-') << "\n";
+    std::cout << std::left << std::setw(35) << "GRAND TOTAL:"
+              << std::right << "$" << std::setw(9) << grandTotal << "\n";
+}
+
+
+// === ADD TO BAG ===
+int getValidInt(const std::string& prompt) {
+    std::string input;
+    while (true) {
+        std::cout << prompt;
+        std::getline(std::cin, input);
+
+        try {
+            size_t pos;
+            int val = std::stoi(input, &pos);
+            if (pos == input.length() && val >= 0) return val;
+        } catch (...) {}
+
+        std::cout << "Invalid input. Please enter a positive number.\n";
+    }
+}
+
+const Product* addToBagLogic(int id, const std::vector<Product>& inventory, std::map<int, int>& bag, int& status) {
+    for (const auto& p : inventory) {
+        if (p.getId() == id) {
+            // Check stock limit
+            // bag[id] accesses current qty (defaulting to 0 if not in bag yet)
+            if (bag[id] >= p.getQuantity()) {
+                status = 2; // Error: Not enough stock
+                return &p;  // Return product so UI can show the name
+            }
+
+            bag[id]++;
+            status = 0; // Success
+            return &p;
+        }
+    }
+    status = 1; // Error: ID not found
+    return nullptr;
+}
+
+void addToBagUI(const std::vector<Product>& inventory, std::map<int, int>& bag) {
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    while (true) {
+        std::cout << "\n--- Add to Bag ---\n";
+        int id = getValidInt("Enter product ID to add (0 to back): ");
+
+        if (id == 0) return;
+
+        int status = 0;
+        const Product* p = addToBagLogic(id, inventory, bag, status);
+
+        if (status == 0) {
+            std::cout << "Success! Added '" << p->getName() << "' to bag.\n";
+            std::cout << "Quantity in bag: " << bag[id] << "\n";
+        }
+        else if (status == 1) {
+            std::cout << "Error: Product ID " << id << " does not exist.\n";
+        }
+        else if (status == 2) {
+            std::cout << "Error: Cannot add '" << p->getName() << "'.\n";
+            std::cout << "Stock limit reached (" << p->getQuantity() << " available).\n";
+        }
+    }
+}
+
+// === REMOVE FROM BAG ===
+int removeFromBagLogic(int id, std::map<int, int>& bag) {
+    auto it = bag.find(id);
+
+    // Case 1: ID not in bag
+    if (it == bag.end()) {
+        return 0;
+    }
+
+    // Decrement quantity
+    it->second--;
+
+    // Case 2: Quantity hit 0, remove entirely
+    if (it->second <= 0) {
+        bag.erase(it);
+        return 2;
+    }
+
+    // Case 3: Just decremented
+    return 1;
+}
+
+
+void removeFromBagUI(std::map<int, int>& bag, const std::vector<Product>& inventory) {
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    while (true) {
+        std::cout << "\n--- Remove from Bag ---\n";
+
+
+        // 1. Auto-exit if bag becomes empty
+        if (bag.empty()) {
+            std::cout << "Nothing to delete, bag is empty. Returning to menu.\n";
+            return;
+        }
+
+        // 2. Input
+        int id = getValidInt("Enter product ID to remove (0 to back): ");
+        if (id == 0) return;
+
+        // 3. Find Name (for display)
+        std::string pName = "Unknown Product";
+        for (const auto& p : inventory) {
+            if (p.getId() == id) {
+                pName = p.getName();
+                break;
+            }
+        }
+
+        // 4. Logic & Display
+        int result = removeFromBagLogic(id, bag);
+
+        if (result == 0) {
+            std::cout << "Error: Product ID " << id << " is not in your bag.\n";
+        }
+        else if (result == 1) {
+            std::cout << "Removed 1 \"" << pName << "\".\n";
+            std::cout << "Remaining quantity: " << bag[id] << "\n";
+        }
+        else if (result == 2) {
+            std::cout << "Removed 1 \"" << pName << "\".\n";
+            std::cout << "Item removed from bag completely.\n";
+        }
+    }
+}
+
+
+
 
 
 
@@ -279,7 +555,6 @@ void searchUI(const std::vector<Product>& inventory)
 {
     std::cout << "\n--- Search Products ---\n";
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    // ... Input gathering code remains the same ...
     std::string name, desc;
     std::cout << "Name (contains): ";
     std::getline(std::cin, name);
@@ -342,6 +617,12 @@ void StoreService::adminMenu()
                     break;
                 }
 
+                if (!deleteProductFromFile(id))
+                {
+                    cout << "Error: Cannot delete product from file.\n";
+                    break;
+                }
+
                 products.erase(
                     remove_if(products.begin(), products.end(),
                               [id](const Product& p) { return p.getId() == id; }),
@@ -354,7 +635,7 @@ void StoreService::adminMenu()
         case 4:
         {
             cout << "\n--- ALL ORDERS ---\n";
-            OrderService service("database/orders.csv");
+            OrderService service("../database/orders.csv");
             auto orders = service.getOrdersByUser("admin"); // admin sees all
 
             if (orders.empty()) {
@@ -397,6 +678,6 @@ void StoreService::loginMenu()
     else
     {
         Customer customer(username);
-        customerMenu();
+        customerMenu(username);
     }
 }

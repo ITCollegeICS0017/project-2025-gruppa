@@ -4,14 +4,17 @@
 #include <iostream>
 
 OrderService::OrderService(const std::string& filepath)
-    : filepath(filepath) {}
+    : filepath(filepath)
+{
+}
 
 std::vector<Order> OrderService::getOrdersByUser(const std::string& username)
 {
     std::vector<Order> orders;
     std::ifstream file(filepath);
 
-    if (!file.is_open()) {
+    if (!file.is_open())
+    {
         std::cerr << "❌ ERROR: Cannot open " << filepath << "\n";
         return orders;
     }
@@ -32,27 +35,25 @@ std::vector<Order> OrderService::getOrdersByUser(const std::string& username)
 
         int id = 0, productId = 0, statusInt = 0;
 
-        try {
+        try
+        {
             id = std::stoi(idStr);
             productId = std::stoi(productStr);
             statusInt = std::stoi(statusStr);
-        } catch (...) {
+        }
+        catch (...)
+        {
             std::cerr << "Skipping malformed line: " << line << "\n";
             continue;
         }
 
-        OrderStatus status;
-        switch (statusInt)
-        {
-            case 1: status = OrderStatus::Scheduled; break;
-            case 2: status = OrderStatus::Delivered; break;
-            case 3: status = OrderStatus::Canceled; break;
-            default: status = OrderStatus::Scheduled;
-        }
+        // enum statuses
+        OrderStatus status = orderStatusFromInt(statusInt);
 
-        // ADMIN: see ALL
         if (username == "admin" || username == user)
+        {
             orders.emplace_back(id, user, productId, date, status);
+        }
     }
 
     return orders;

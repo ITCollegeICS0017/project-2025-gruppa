@@ -14,7 +14,7 @@ public:
 
     void addProduct();
 
-    void customerMenu();
+    void customerMenu(const std::string& username);
 
     void adminMenu();
 

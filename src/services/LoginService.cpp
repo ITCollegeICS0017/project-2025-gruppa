@@ -124,7 +124,7 @@ void LoginService::loginMenu() const
         else
         {
             cout << "Welcome, " << username << ".\n";
-            store.customerMenu();
+            store.customerMenu(username);
         }
 
         break;
